@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.chenxiaojie.lion.dao.LionMapDao">
+    <resultMap id="LionMap" type="com.chenxiaojie.lion.entity.LionMap">
+        <result column="id" property="id"/>
+        <result column="mapKey" property="mapKey"/>
+        <result column="mapValue" property="mapValue"/>
+        <result column="lazy" property="lazy"/>
+        <result column="projectName" property="projectName"/>
+    </resultMap>
+</mapper>

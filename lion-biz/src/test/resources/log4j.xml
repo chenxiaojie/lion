@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+    <appender name="defaultConsole" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="%d %p [%t] %l --> %m%n"/>
+        </layout>
+        <!--过滤器设置输出的级别-->
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="DEBUG"/>
+            <param name="levelMax" value="ERROR"/>
+            <param name="AcceptOnMatch" value="true"/>
+        </filter>
+    </appender>
+
+    <appender name="defaultAppender" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="/data/chenxiaojie/default.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %p [%t] %l --> %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="mybatisAppender" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="/data/chenxiaojie/mybatis.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %p [%t] %l --> %m%n"/>
+        </layout>
+    </appender>
+
+    <logger name="org.mybatis" additivity="false">
+        <level value="WARN"/>
+        <appender-ref ref="defaultConsole"/>
+        <appender-ref ref="mybatisAppender"/>
+    </logger>
+
+    <logger name="java.sql">
+        <level value="WARN"/>
+    </logger>
+
+    <logger name="org.springframework.jms">
+        <level value="ERROR"/>
+    </logger>
+
+    <logger name="org.apache.activemq">
+        <level value="ERROR"/>
+    </logger>
+
+    <logger name="org.apache.struts2">
+        <level value="ERROR"/>
+    </logger>
+
+    <logger name="org.apache.struts2.dispatcher.Dispatcher"
+            additivity="false">
+        <level value="WARN"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="illegalAccessAppender"/>
+    </logger>
+
+
+    <!-- 根logger的设置-->
+    <root>
+        <priority value="INFO"/>
+        <appender-ref ref="defaultConsole"/>
+        <appender-ref ref="defaultAppender"/>
+    </root>
+
+
+    <!--
+    (1). 输出方式appender一般有5种：
+             org.apache.log4j.RollingFileAppender(滚动文件，自动记录最新日志)
+             org.apache.log4j.ConsoleAppender (控制台)
+             org.apache.log4j.FileAppender (文件)
+             org.apache.log4j.DailyRollingFileAppender (每天产生一个日志文件)
+             org.apache.log4j.WriterAppender (将日志信息以流格式发送到任意指定的地方)
+    (2). 日记记录的优先级priority，优先级由高到低分为
+            OFF ,FATAL ,ERROR ,WARN ,INFO ,DEBUG ,ALL。
+            Log4j建议只使用FATAL ,ERROR ,WARN ,INFO ,DEBUG这五个级别。
+    (3). 格式说明layout中的参数都以%开始，后面不同的参数代表不同的格式化信息（参数按字母表顺序列出）：
+                %c    输出所属类的全名，可在修改为 %d{Num} ,Num类名输出的维（如："org.apache.elathen.ClassName",%C{2}将输出elathen.ClassName）
+                %d    输出日志时间其格式为 %d{yyyy-MM-dd HH:mm:ss,SSS}，可指定格式 如 %d{HH:mm:ss}
+                %l    输出日志事件发生位置，包括类目名、发生线程，在代码中的行数
+                %n    换行符
+                %m    输出代码指定信息，如info(“message”),输出message
+                %p    输出优先级，即 FATAL ,ERROR 等
+                %r    输出从启动到显示该log信息所耗费的毫秒数
+                %t    输出产生该日志事件的线程名
+    -->
+</log4j:configuration>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+	http://www.springframework.org/schema/beans  
+	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+    <context:component-scan base-package="com.chenxiaojie.lion.utils"/>
+
+    <bean id="lionPlaceholder"
+          class="com.chenxiaojie.lion.spring.LionPlaceholder">
+        <property name="locations">
+            <list>
+                <value>classpath*:spring/appcontext.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 配置lion数据源 -->
+    <!--<bean id="lionDataSource"-->
+    <!--class="org.springframework.jdbc.datasource.DriverManagerDataSource">-->
+    <!--<property name="driverClassName" value="com.mysql.jdbc.Driver"/>-->
+    <!--<property name="url" value="jdbc:mysql://localhost:3306/lion?useUnicode=true&amp;characterEncoding=UTF-8"/>-->
+    <!--<property name="username" value="root"/>-->
+    <!--<property name="password" value="qwe888888"/>-->
+    <!--</bean>-->
+
+    <!-- 配置数据源 -->
+    <bean id="lionDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${driverClassName}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+    </bean>
+
+    <bean id="lionSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="lionDataSource"/>
+        <!--<property name="configLocation" value="mybatis/mybatis.xml"></property>-->
+        <!--<property name="mapperLocations" value="classpath*:mybatis/mappers/*.xml"></property>-->
+    </bean>
+
+</beans>

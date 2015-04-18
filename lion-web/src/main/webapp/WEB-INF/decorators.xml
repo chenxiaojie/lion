@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<decorators defaultdir="/WEB-INF/sitemesh">
+    <excludes>
+        <pattern>/images/*</pattern>
+        <pattern>/css/*</pattern>
+        <pattern>/js/*</pattern>
+        <pattern>/fonts/*</pattern>
+        <pattern>/div/*</pattern>
+    </excludes>
+    <decorator name="base" page="base.ftl">
+        <pattern>/*</pattern>
+    </decorator>
+</decorators>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+	http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+    <!-- 注册远程服务 -->
+    <!--<bean name="/xiaojie.lionService" class="org.springframework.remoting.caucho.HessianServiceExporter">-->
+    <!--<property name="service" ref="lionService"/>-->
+    <!--<property name="serviceInterface" value="LionService"/>-->
+    <!--</bean>-->
+
+    <bean class="com.chenxiaojie.pigeon.registry.RemoteServiceRegistry">
+        <property name="servicePrefix" value="lion"></property>
+        <property name="services">
+            <map>
+                <!--<entry key="lionService" value-ref="lionService"></entry>-->
+                <entry key="lionManagerService" value-ref="lionManagerService"></entry>
+                <entry key="lionRegisterListenerService" value-ref="lionRegisterListenerService"/>
+            </map>
+        </property>
+    </bean>
+</beans>
