@@ -1,4 +1,4 @@
-package com.chenxiaojie.lion.notify.listener;
+package com.chenxiaojie.lion.notify.message;
 
 import com.chenxiaojie.lion.dto.LionMapDTO;
 import com.chenxiaojie.lion.type.NotifyType;

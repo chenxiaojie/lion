@@ -9,4 +9,9 @@
         <property name="sqlSessionFactory" ref="lionSessionFactory"/>
         <property name="mapperInterface" value="com.chenxiaojie.lion.dao.LionMapDao"/>
     </bean>
+
+    <bean id="lionListenerDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="sqlSessionFactory" ref="lionSessionFactory"/>
+        <property name="mapperInterface" value="com.chenxiaojie.lion.dao.LionListenerDao"/>
+    </bean>
 </beans>

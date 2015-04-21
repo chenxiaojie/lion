@@ -3,7 +3,7 @@ package com.chenxiaojie.lion.biz.impl;
 import com.chenxiaojie.lion.biz.LionMapBiz;
 import com.chenxiaojie.lion.dao.LionMapDao;
 import com.chenxiaojie.lion.entity.LionMap;
-import com.chenxiaojie.lion.notify.listener.Observer;
+import com.chenxiaojie.lion.notify.observer.Observer;
 import com.chenxiaojie.lion.transformer.LionMapDTOTransformer;
 import com.chenxiaojie.lion.type.NotifyType;
 import lombok.extern.slf4j.Slf4j;
