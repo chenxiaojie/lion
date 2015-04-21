@@ -1,4 +1,4 @@
-package com.chenxiaojie.lion.test.lionmap;
+package com.chenxiaojie.lion.test.lion;
 
 import com.chenxiaojie.lion.biz.LionMapBiz;
 import com.chenxiaojie.lion.entity.LionMap;

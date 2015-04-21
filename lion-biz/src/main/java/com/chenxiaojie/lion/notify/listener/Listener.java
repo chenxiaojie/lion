@@ -13,27 +13,8 @@ public class Listener {
 
     private String url;
 
-    private int env;
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
+    public Listener(String url) {
         this.url = url;
-    }
-
-    public int getEnv() {
-        return env;
-    }
-
-    public void setEnv(int env) {
-        this.env = env;
-    }
-
-    public Listener(String url, int env) {
-        this.url = url;
-        this.env = env;
         RmiProxyFactoryBean rmiProxyFactoryBean = new RmiProxyFactoryBean();
         rmiProxyFactoryBean.setServiceUrl("rmi://" + this.url + "/notify");
         rmiProxyFactoryBean.setServiceInterface(LionListener.class);
@@ -51,4 +32,9 @@ public class Listener {
         }
         return false;
     }
+
+    public String getUrl() {
+        return url;
+    }
+
 }

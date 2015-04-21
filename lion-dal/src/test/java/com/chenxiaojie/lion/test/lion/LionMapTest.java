@@ -1,4 +1,4 @@
-package com.chenxiaojie.lion.test.lionmap;
+package com.chenxiaojie.lion.test.lion;
 
 import com.chenxiaojie.lion.dao.LionMapDao;
 import com.chenxiaojie.lion.entity.LionMap;
@@ -155,11 +155,10 @@ public class LionMapTest {
     @Test
     public void testReplace() {
         LionMap lionMap = new LionMap();
-        lionMap.setId(134);
-        lionMap.setMapKey("male");
+        lionMap.setMapKey("邹冬冬");
         lionMap.setMapValue("陈孝杰");
         lionMap.setLazy(false);
-        lionMap.setProjectName("lion");
+        lionMap.setProjectName("pigeon");
         lionMap.setEnv(LionEnv.ONLINE.value);
         System.out.println(lionMapDao.replace(lionMap));
     }
