@@ -4,10 +4,8 @@
 
     <appender name="defaultConsole" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern"
-                   value="%d %p [%t] %l --> %m%n"/>
+            <param name="ConversionPattern" value="%d %p [%t] %l --> %m%n"/>
         </layout>
-        <!--过滤器设置输出的级别-->
         <filter class="org.apache.log4j.varia.LevelRangeFilter">
             <param name="levelMin" value="DEBUG"/>
             <param name="levelMax" value="ERROR"/>
@@ -22,50 +20,11 @@
         </layout>
     </appender>
 
-    <appender name="mybatisAppender" class="org.apache.log4j.DailyRollingFileAppender">
-        <param name="File" value="/data/chenxiaojie/mybatis.log"/>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d %p [%t] %l --> %m%n"/>
-        </layout>
-    </appender>
-
-    <logger name="org.mybatis" additivity="false">
-        <level value="WARN"/>
-        <appender-ref ref="defaultConsole"/>
-        <appender-ref ref="mybatisAppender"/>
-    </logger>
-
-    <logger name="java.sql">
-        <level value="WARN"/>
-    </logger>
-
-    <logger name="org.springframework.jms">
-        <level value="ERROR"/>
-    </logger>
-
-    <logger name="org.apache.activemq">
-        <level value="ERROR"/>
-    </logger>
-
-    <logger name="org.apache.struts2">
-        <level value="ERROR"/>
-    </logger>
-
-    <logger name="org.apache.struts2.dispatcher.Dispatcher"
-            additivity="false">
-        <level value="WARN"/>
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="illegalAccessAppender"/>
-    </logger>
-
-
-    <!-- 根logger的设置-->
     <root>
         <priority value="INFO"/>
         <appender-ref ref="defaultConsole"/>
         <appender-ref ref="defaultAppender"/>
     </root>
-
 
     <!--
     (1). 输出方式appender一般有5种：

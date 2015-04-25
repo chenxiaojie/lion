@@ -33,7 +33,7 @@ public class LionRegisterListenerServiceImpl implements LionRegisterListenerServ
             lionListener.setProjectName(projectName);
             result = lionListenerDao.insert(lionListener) > 0;
         }
-        log.info("registerListener,projectName:" + projectName + ",listenerURL:" + listenerURL + ",env" + env + "result:" + result);
+        log.info("registerListener,projectName:" + projectName + ",listenerURL:" + listenerURL + ",env" + env + ",result:" + result);
         return result;
     }
 

@@ -1,6 +1,6 @@
 <#setting classic_compatible=true>
 <head>
-    <title>集中式配置管理系统-lion</title>
+    <title>集中配置管理系统 - lion</title>
     <script type="text/javascript">
         $(document).ready(function () {
             $('#projectSelection').modal({

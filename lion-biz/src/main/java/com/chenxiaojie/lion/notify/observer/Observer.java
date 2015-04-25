@@ -29,19 +29,71 @@ public class Observer implements DisposableBean {
 
     @Autowired
     private LionListenerDao lionListenerDao;
-
-    private Thread thread;
+    /**
+     * 用于缓存所有Listener,key:URL,value:Listener
+     */
     private Map<String, Listener> listenerMap = Maps.newHashMap();
+    /**
+     * 任务队列
+     */
     private LinkedList<NotifyMessage> msgList = Lists.newLinkedList();
-    private LinkedList<Listener> errorListenerList = Lists.newLinkedList();
+    /**
+     * 处理任务队列的线程
+     */
+    private Thread thread;
+    /**
+     * 线程锁,避免多线程并发产生数据不一致的问题
+     */
     private Lock lock = new ReentrantLock();
     private Condition condition = lock.newCondition();
+
+    public Observer() {
+        thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    processMsgQueue();
+                }
+            }
+        });
+        thread.start();
+    }
 
     public void notifyAll(final LionMapDTO lionMapDTO, final NotifyType notifyType) {
         msgList.add(new NotifyMessage(lionMapDTO, notifyType));
         lock.lock();
         condition.signal();
         lock.unlock();
+    }
+
+    private void processMsgQueue() {
+        try {
+            lock.lock();
+            while (msgList.isEmpty()) {
+                condition.await();
+            }
+            processMsg(msgList.removeFirst());
+        } catch (InterruptedException e) {
+            log.error("processMsgQueue异常", e);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private void processMsg(NotifyMessage notifyMessage) {
+        LionMapDTO lionMapDTO = notifyMessage.getLionMapDTO();
+        List<Listener> listenerList = getListenerList(lionMapDTO.getProjectName(), lionMapDTO.getEnv());
+        if (listenerList != null && listenerList.size() > 0) {
+            for (Listener listener : listenerList) {
+                try {
+                    listener.notify(lionMapDTO, notifyMessage.getNotifyType());
+                } catch (Exception e) {
+                    //通知异常删除这个监听器,添加到异常List,避免循环时删除异常
+                    log.info("processMsg异常,移除错误的Listener");
+                    removeListener(lionMapDTO.getProjectName(), listener.getUrl(), lionMapDTO.getEnv());
+                }
+            }
+        }
     }
 
     private List<Listener> getListenerList(String projectName, int env) {
@@ -57,7 +109,7 @@ public class Observer implements DisposableBean {
                     }
                     listenerList.add(listener);
                 } catch (Exception e) {
-                    log.info("getListenerList异常,移除错误的Listener,URL:" + lionListener.getListenerURL());
+                    log.info("getListenerList异常,移除错误的Listener");
                     removeListener(lionListener.getProjectName(), lionListener.getListenerURL(), lionListener.getEnv());
                 }
             }
@@ -67,56 +119,9 @@ public class Observer implements DisposableBean {
     }
 
     private void removeListener(String projectName, String listenerURL, int env) {
-        boolean result = lionListenerDao.updateActiveByProjectAndEnvAndURL(false, projectName, env, listenerURL) > 0;
-        log.info("removeListener,projectName:" + projectName + ",listenerURL:" + listenerURL + ",env" + env + "result:" + result);
-    }
-
-    public Observer() {
-        thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    processMsgQueue();
-                }
-            }
-        });
-        thread.start();
-    }
-
-    private void processMsgQueue() {
-        try {
-            lock.lock();
-            while (msgList.isEmpty()) {
-                condition.await();
-            }
-            processMsg(msgList.removeFirst());
-        } catch (InterruptedException e) {
-            log.error("Listener等待异常", e);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    private void processMsg(NotifyMessage notifyMessage) {
-        LionMapDTO lionMapDTO = notifyMessage.getLionMapDTO();
-        List<Listener> listenerList = getListenerList(lionMapDTO.getProjectName(), lionMapDTO.getEnv());
-        if (listenerList != null && listenerList.size() > 0) {
-            for (Listener listener : listenerList) {
-                try {
-                    listener.notify(lionMapDTO, notifyMessage.getNotifyType());
-                } catch (Exception e) {
-                    //通知异常删除这个监听器,添加到异常List,避免循环时删除异常
-                    errorListenerList.add(listener);
-                    removeListener(lionMapDTO.getProjectName(), listener.getUrl(), lionMapDTO.getEnv());
-                }
-            }
-            if (!errorListenerList.isEmpty()) {
-                for (Listener listener : errorListenerList) {
-                    listenerList.remove(listener);
-                }
-                errorListenerList.clear();
-            }
-        }
+        listenerMap.remove(listenerURL);
+        lionListenerDao.updateActiveByProjectAndEnvAndURL(false, projectName, env, listenerURL);
+        log.info("removeListener,projectName:" + projectName + ",listenerURL:" + listenerURL + ",env" + env);
     }
 
     @Override
