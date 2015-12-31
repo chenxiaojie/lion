@@ -18,10 +18,31 @@
     <properties>
         <spring.version>3.2.8.RELEASE</spring.version>
         <project.version>0.0.1</project.version>
+        <api.version>0.0.2-SNAPSHOT</api.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.chenxiaojie</groupId>
+                <artifactId>lion-api</artifactId>
+                <version>${api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.chenxiaojie</groupId>
+                <artifactId>lion-dal</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.chenxiaojie</groupId>
+                <artifactId>lion-biz</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.chenxiaojie</groupId>
+                <artifactId>lion-web</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!-- junit jar -->
             <dependency>
                 <groupId>junit</groupId>
@@ -180,21 +201,21 @@
         </dependencies>
     </dependencyManagement>
 
-    <repositories>
-        <repository>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>public</id>
-            <name>Public Repositories</name>
-            <url>http://localhost:8081/nexus/content/repositories/com.chenxiaojie/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>public</id>
-            <name>Public Repositories</name>
-            <url>http://localhost:8081/nexus/content/repositories/com.chenxiaojie/</url>
-        </pluginRepository>
-    </pluginRepositories>
+    <!--<repositories>-->
+        <!--<repository>-->
+            <!--<snapshots>-->
+                <!--<enabled>true</enabled>-->
+            <!--</snapshots>-->
+            <!--<id>public</id>-->
+            <!--<name>Public Repositories</name>-->
+            <!--<url>http://localhost:8081/nexus/content/repositories/com.chenxiaojie/</url>-->
+        <!--</repository>-->
+    <!--</repositories>-->
+    <!--<pluginRepositories>-->
+        <!--<pluginRepository>-->
+            <!--<id>public</id>-->
+            <!--<name>Public Repositories</name>-->
+            <!--<url>http://localhost:8081/nexus/content/repositories/com.chenxiaojie/</url>-->
+        <!--</pluginRepository>-->
+    <!--</pluginRepositories>-->
 </project>

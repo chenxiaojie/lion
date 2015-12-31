@@ -4,6 +4,7 @@ package com.chenxiaojie.lion.dto;
  * Created by xiaojie.chen on 2015-03-04 15:35:16.
  */
 public class LionMapDTO implements java.io.Serializable {
+    private static final long serialVersionUID = -1598253557137500031L;
     private int id;
     private String mapKey;
     private String mapValue;

@@ -10,22 +10,22 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
     <artifactId>lion-biz</artifactId>
+    <version>${project.version}</version>
+    <name>lion-biz</name>
+    <url>http://maven.apache.org</url>
 
     <dependencies>
         <dependency>
             <groupId>com.chenxiaojie</groupId>
-            <artifactId>lion-dal</artifactId>
-            <version>0.0.1</version>
+            <artifactId>lion-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.chenxiaojie</groupId>
-            <artifactId>lion-api</artifactId>
-            <version>0.0.1</version>
+            <artifactId>lion-dal</artifactId>
         </dependency>
         <dependency>
             <groupId>com.chenxiaojie</groupId>
             <artifactId>lion-utils</artifactId>
-            <version>0.0.1</version>
         </dependency>
     </dependencies>
 </project>

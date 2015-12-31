@@ -2,6 +2,7 @@ package com.chenxiaojie.lion.notify.listener;
 
 import com.chenxiaojie.lion.dto.LionMapDTO;
 import com.chenxiaojie.lion.type.NotifyType;
+import com.chenxiaojie.lion.utils.CommonListener;
 import org.springframework.remoting.rmi.RmiProxyFactoryBean;
 
 /**
@@ -9,7 +10,7 @@ import org.springframework.remoting.rmi.RmiProxyFactoryBean;
  */
 public class Listener {
 
-    private LionListener lionListener;
+    private CommonListener commonListener;
 
     private String url;
 
@@ -17,20 +18,23 @@ public class Listener {
         this.url = url;
         RmiProxyFactoryBean rmiProxyFactoryBean = new RmiProxyFactoryBean();
         rmiProxyFactoryBean.setServiceUrl("rmi://" + this.url + "/notify");
-        rmiProxyFactoryBean.setServiceInterface(LionListener.class);
+        rmiProxyFactoryBean.setServiceInterface(CommonListener.class);
         rmiProxyFactoryBean.afterPropertiesSet();
-        this.lionListener = (LionListener) rmiProxyFactoryBean.getObject();
+        this.commonListener = (CommonListener) rmiProxyFactoryBean.getObject();
     }
 
-    public boolean notify(LionMapDTO lionMapDTO, NotifyType notifyType) {
-        if (notifyType == NotifyType.INSERT) {
-            return lionListener.insert(lionMapDTO);
-        } else if (notifyType == NotifyType.DELETE) {
-            return lionListener.delete(lionMapDTO);
-        } else if (notifyType == NotifyType.UPDATE) {
-            return lionListener.update(lionMapDTO);
+    public void notify(LionMapDTO lionMapDTO, NotifyType notifyType) {
+        switch (notifyType) {
+            case UPDATE:
+                commonListener.update(lionMapDTO);
+                break;
+            case INSERT:
+                commonListener.insert(lionMapDTO);
+                break;
+            case DELETE:
+                commonListener.delete(lionMapDTO);
+                break;
         }
-        return false;
     }
 
     public String getUrl() {

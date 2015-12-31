@@ -10,12 +10,17 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -23,9 +28,9 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by xiaojie.chen on 2015-03-22 17:12:59.
  */
-@Component("observer")
 @Slf4j
-public class Observer implements DisposableBean {
+@Component("observer")
+public class Observer implements InitializingBean, DisposableBean {
 
     @Autowired
     private LionListenerDao lionListenerDao;
@@ -40,24 +45,12 @@ public class Observer implements DisposableBean {
     /**
      * 处理任务队列的线程
      */
-    private Thread thread;
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
     /**
      * 线程锁,避免多线程并发产生数据不一致的问题
      */
     private Lock lock = new ReentrantLock();
     private Condition condition = lock.newCondition();
-
-    public Observer() {
-        thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    processMsgQueue();
-                }
-            }
-        });
-        thread.start();
-    }
 
     public void notifyAll(final LionMapDTO lionMapDTO, final NotifyType notifyType) {
         msgList.add(new NotifyMessage(lionMapDTO, notifyType));
@@ -125,7 +118,31 @@ public class Observer implements DisposableBean {
     }
 
     @Override
-    public void destroy() throws Exception {
-        thread.interrupt();
+    public void afterPropertiesSet() throws Exception {
+        log.info("afterPropertiesSet");
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    processMsgQueue();
+                }
+            }
+        });
     }
+
+    @Override
+    public void destroy() throws Exception {
+        log.info("destroy");
+    }
+
+    @PostConstruct
+    public void postConstruct() throws Exception {
+        log.info("postConstruct");
+    }
+
+    @PreDestroy
+    public void preDestroy() throws Exception {
+        log.info("preDestroy");
+    }
+
 }
