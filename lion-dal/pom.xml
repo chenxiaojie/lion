@@ -86,9 +86,5 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.chenxiaojie</groupId>
-            <artifactId>pigeon-utils</artifactId>
-        </dependency>
     </dependencies>
 </project>

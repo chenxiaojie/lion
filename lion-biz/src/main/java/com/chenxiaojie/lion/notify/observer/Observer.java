@@ -14,8 +14,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +64,7 @@ public class Observer implements InitializingBean, DisposableBean {
                 condition.await();
             }
             processMsg(msgList.removeFirst());
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             log.error("processMsgQueue异常", e);
         } finally {
             lock.unlock();
@@ -80,9 +78,10 @@ public class Observer implements InitializingBean, DisposableBean {
             for (Listener listener : listenerList) {
                 try {
                     listener.notify(lionMapDTO, notifyMessage.getNotifyType());
+                    log.info("notify success,listenerURL:" + listener.getUrl() + ";lionMapDTO:" + lionMapDTO + ";notifyType:" + notifyMessage.getNotifyType());
                 } catch (Exception e) {
                     //通知异常删除这个监听器,添加到异常List,避免循环时删除异常
-                    log.info("processMsg异常,移除错误的Listener");
+                    log.warn("processMsg异常,移除错误的Listener");
                     removeListener(lionMapDTO.getProjectName(), listener.getUrl(), lionMapDTO.getEnv());
                 }
             }
@@ -132,17 +131,23 @@ public class Observer implements InitializingBean, DisposableBean {
 
     @Override
     public void destroy() throws Exception {
+//        try {
+//            executorService.shutdownNow();
+//            executorService.shutdown();
+//        } catch (Exception e) {
+//            log.error("destroy error", e);
+//        }
         log.info("destroy");
     }
 
-    @PostConstruct
-    public void postConstruct() throws Exception {
-        log.info("postConstruct");
-    }
-
-    @PreDestroy
-    public void preDestroy() throws Exception {
-        log.info("preDestroy");
-    }
+//    @PostConstruct
+//    public void postConstruct() throws Exception {
+//        log.info("postConstruct 注解会先执行");
+//    }
+//
+//    @PreDestroy
+//    public void preDestroy() throws Exception {
+//        log.info("preDestroy 注解会先执行");
+//    }
 
 }

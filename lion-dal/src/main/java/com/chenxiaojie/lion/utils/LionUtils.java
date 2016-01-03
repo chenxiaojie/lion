@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Created by xiaojie.chen on 2015-03-05 11:19:15.
  */
-@Component
+//@Component
 @Slf4j
 public class LionUtils implements InitializingBean {
 

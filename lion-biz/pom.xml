@@ -25,7 +25,17 @@
         </dependency>
         <dependency>
             <groupId>com.chenxiaojie</groupId>
+            <artifactId>pigeon-utils</artifactId>
+            <!--<version>0.0.1</version>-->
+            <!--<scope>system</scope>-->
+            <!--<systemPath>${project.basedir}/../privateLib/pigeon-utils-0.0.1.jar</systemPath>-->
+        </dependency>
+        <dependency>
+            <groupId>com.chenxiaojie</groupId>
             <artifactId>lion-utils</artifactId>
+            <!--<version>0.0.1</version>-->
+            <!--<scope>system</scope>-->
+            <!--<systemPath>${project.basedir}/../privateLib/lion-utils-0.0.1.jar</systemPath>-->
         </dependency>
     </dependencies>
 </project>

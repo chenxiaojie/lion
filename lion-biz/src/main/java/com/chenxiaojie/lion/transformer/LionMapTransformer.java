@@ -13,6 +13,9 @@ public class LionMapTransformer implements Function<LionMapDTO, LionMap> {
 
     @Override
     public LionMap apply(LionMapDTO src) {
+        if (src == null) {
+            return null;
+        }
         LionMap des = new LionMap();
         des.setId(src.getId());
         des.setMapKey(src.getMapKey());
