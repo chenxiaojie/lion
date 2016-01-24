@@ -32,26 +32,35 @@ public class Observer implements InitializingBean, DisposableBean {
 
     @Autowired
     private LionListenerDao lionListenerDao;
+
     /**
      * 用于缓存所有Listener,key:URL,value:Listener
      */
-    private Map<String, Listener> listenerMap = Maps.newHashMap();
+    private Map<String, Listener> listenerMap = Maps.newConcurrentMap();
+
     /**
      * 任务队列
      */
-    private LinkedList<NotifyMessage> msgList = Lists.newLinkedList();
+    private LinkedList<NotifyMessage> msgQueue = Lists.newLinkedList();
+
     /**
      * 处理任务队列的线程
      */
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private ExecutorService msgQueueMonitorExecutorService = Executors.newSingleThreadExecutor();
+
+    /**
+     * 发送通知线程
+     */
+    private ExecutorService sendMsgExecutorService = Executors.newFixedThreadPool(100);
+
     /**
      * 线程锁,避免多线程并发产生数据不一致的问题
      */
     private Lock lock = new ReentrantLock();
     private Condition condition = lock.newCondition();
 
-    public void notifyAll(final LionMapDTO lionMapDTO, final NotifyType notifyType) {
-        msgList.add(new NotifyMessage(lionMapDTO, notifyType));
+    public void notifyAll(LionMapDTO lionMapDTO, NotifyType notifyType) {
+        msgQueue.add(new NotifyMessage(lionMapDTO, notifyType));
         lock.lock();
         condition.signal();
         lock.unlock();
@@ -60,10 +69,10 @@ public class Observer implements InitializingBean, DisposableBean {
     private void processMsgQueue() {
         try {
             lock.lock();
-            while (msgList.isEmpty()) {
+            while (msgQueue.isEmpty()) {
                 condition.await();
             }
-            processMsg(msgList.removeFirst());
+            processMsg(msgQueue.removeFirst());
         } catch (Exception e) {
             log.error("processMsgQueue异常", e);
         } finally {
@@ -71,55 +80,41 @@ public class Observer implements InitializingBean, DisposableBean {
         }
     }
 
-    private void processMsg(NotifyMessage notifyMessage) {
-        LionMapDTO lionMapDTO = notifyMessage.getLionMapDTO();
-        List<Listener> listenerList = getListenerList(lionMapDTO.getProjectName(), lionMapDTO.getEnv());
-        if (listenerList != null && listenerList.size() > 0) {
-            for (Listener listener : listenerList) {
-                try {
-                    listener.notify(lionMapDTO, notifyMessage.getNotifyType());
-                    log.info("notify success,listenerURL:" + listener.getUrl() + ";lionMapDTO:" + lionMapDTO + ";notifyType:" + notifyMessage.getNotifyType());
-                } catch (Exception e) {
-                    //通知异常删除这个监听器,添加到异常List,避免循环时删除异常
-                    log.warn("processMsg异常,移除错误的Listener");
-                    removeListener(lionMapDTO.getProjectName(), listener.getUrl(), lionMapDTO.getEnv());
-                }
-            }
-        }
-    }
+    private void processMsg(final NotifyMessage notifyMessage) {
+        final LionMapDTO lionMapDTO = notifyMessage.getLionMapDTO();
+        List<LionListener> lionListenerList = lionListenerDao.getActiveByProjectAndEnv(lionMapDTO.getProjectName(), lionMapDTO.getEnv());
 
-    private List<Listener> getListenerList(String projectName, int env) {
-        List<LionListener> lionListenerList = lionListenerDao.getActiveByProjectAndEnv(projectName, env);
         if (lionListenerList != null && lionListenerList.size() > 0) {
-            List<Listener> listenerList = Lists.newArrayList();
-            for (LionListener lionListener : lionListenerList) {
-                try {
-                    Listener listener = listenerMap.get(lionListener.getListenerURL());
-                    if (listener == null) {
-                        listener = new Listener(lionListener.getListenerURL());
-                        listenerMap.put(lionListener.getListenerURL(), listener);
+            for (final LionListener lionListener : lionListenerList) {
+                sendMsgExecutorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Listener listener = listenerMap.get(lionListener.getListenerURL());
+                            if (listener == null) {
+                                listener = new Listener(lionListener.getListenerURL());
+                                listenerMap.put(lionListener.getListenerURL(), listener);
+                            }
+                            listener.notify(lionMapDTO, notifyMessage.getNotifyType());
+                            log.info("notify success,listenerURL:" + listener.getUrl() + ";lionMapDTO:" + lionMapDTO + ";notifyType:" + notifyMessage.getNotifyType());
+                        } catch (Exception e) {
+                            //通知异常删除这个监听器,添加到异常List,避免循环时删除异常
+                            log.warn("processMsg异常,移除错误的Listener");
+                            listenerMap.remove(lionListener.getListenerURL());
+                            lionListenerDao.updateActiveByProjectAndEnvAndURL(false, lionListener.getProjectName(), lionListener.getEnv(), lionListener.getListenerURL());
+                            log.info("removeListener,projectName:" + lionListener.getProjectName() + ",listenerURL:" + lionListener.getListenerURL() + ",env" + lionListener.getEnv());
+                        }
                     }
-                    listenerList.add(listener);
-                } catch (Exception e) {
-                    log.info("getListenerList异常,移除错误的Listener");
-                    removeListener(lionListener.getProjectName(), lionListener.getListenerURL(), lionListener.getEnv());
-                }
+                });
             }
-            return listenerList;
         }
-        return null;
     }
 
-    private void removeListener(String projectName, String listenerURL, int env) {
-        listenerMap.remove(listenerURL);
-        lionListenerDao.updateActiveByProjectAndEnvAndURL(false, projectName, env, listenerURL);
-        log.info("removeListener,projectName:" + projectName + ",listenerURL:" + listenerURL + ",env" + env);
-    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
         log.info("afterPropertiesSet");
-        executorService.submit(new Runnable() {
+        msgQueueMonitorExecutorService.submit(new Runnable() {
             @Override
             public void run() {
                 while (true) {
@@ -131,13 +126,14 @@ public class Observer implements InitializingBean, DisposableBean {
 
     @Override
     public void destroy() throws Exception {
-//        try {
-//            executorService.shutdownNow();
-//            executorService.shutdown();
-//        } catch (Exception e) {
-//            log.error("destroy error", e);
-//        }
         log.info("destroy");
+        try {
+            //msgQueueMonitorExecutorService.shutdownNow();
+            sendMsgExecutorService.shutdown();
+            msgQueueMonitorExecutorService.shutdown();
+        } catch (Exception e) {
+            log.error("destroy error", e);
+        }
     }
 
 //    @PostConstruct
